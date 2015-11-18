@@ -1,0 +1,29 @@
+{
+  "name": "ytwf",
+  "version": "1.0.0",
+  "description": "youtube with fronds",
+  "main": "server.js",
+  "dependencies": {
+    "express": "^4.13.3",
+    "moment": "^2.10.6",
+    "redis": "^2.3.1",
+    "request": "^2.67.0",
+    "socket.io": "^1.3.7",
+    "trequest": "^8.2.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dylangustaveson/ytwf.git"
+  },
+  "author": "afawfaaw",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dylangustaveson/ytwf/issues"
+  },
+  "homepage": "https://github.com/dylangustaveson/ytwf#readme"
+}
