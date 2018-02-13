@@ -119,20 +119,20 @@
 				socket.emit('dequeue', event.currentTarget.attributes["songId"].value);
 			}
 
-			function addSongToSongList(obj, prepend) {
+			function addSongToSongList(song, prepend) {
 				if (prepend) {
-					$('#songList').prepend(getTableRow(obj));
+					$('#songList').prepend(getTableRow(song));
 				} else {
-					$('#songList').append(getTableRow(obj));
+					$('#songList').append(getTableRow(song));
 				}
 			}
 
-			function deleteSongFromSongList(obj) {
-				$("#songList").find(`div[songId='${obj.id}']`).remove();
+			function deleteSongFromSongList(song) {
+				$("#songList").find(`div[songId='${song.id}']`).remove();
 			}
 
-			function moveSongToTop(id) {
-				var row = $("div[songId=" + id + "]");
+			function moveSongToTop(song) {
+				var row = $("div[songId=" + song + "]");
 
 				row.detach();
 
@@ -140,26 +140,26 @@
 			}
 
 
-			function putSongAtEnd(id) {
-				var row = $("div[songId=" + id + "]");
+			function putSongAtEnd(song) {
+				var row = $("div[songId=" + song + "]");
 
 				row.detach();
 
 				$("#songList").append(row);
 			}
 
-			function getTableRow(songObj) {
-				var songMin = Math.floor(songObj.time / 60);
-				var songSec = songObj.time % 60;
+			function getTableRow(song) {
+				var songMin = Math.floor(song.time / 60);
+				var songSec = song.time % 60;
 
 				var row = $(''+
-				`<div songId="${songObj.id}" class="song-row pure-g">` +
-					`<span class="pure-u-17-24 song-row-content">${songObj.title}'</span>` +
-					`<span class="pure-u-3-24 song-row-content">${songMin}'m'${songSec}'s</span>` +
-					`<span class="pure-u-1-24 song-row-queue" songId="${songObj.id}"><i class="fa fa-chevron-up"></i></span>` +
-					`<span class="pure-u-1-24 song-row-dequeue" songId="${songObj.id}"><i class="fa fa-chevron-down"></i></span>` +
+				`<div songId="${song.id}" class="song-row pure-g">` +
+					`<span class="pure-u-17-24 song-row-content">${song.title}'</span>` +
+					`<span class="pure-u-3-24 song-row-content">${songMin}m${songSec}s</span>` +
+					`<span class="pure-u-1-24 song-row-queue" songId="${song.id}"><i class="fa fa-chevron-up"></i></span>` +
+					`<span class="pure-u-1-24 song-row-dequeue" songId="${song.id}"><i class="fa fa-chevron-down"></i></span>` +
 					`<span class="pure-u-1-24"></span>` +
-					`<span class="pure-u-1-24 song-row-delete" songId="${songObj.id}"><i class="fa fa-times"></i></span>` +
+					`<span class="pure-u-1-24 song-row-delete" songId="${song.id}"><i class="fa fa-times"></i></span>` +
 				`</div>`);
 
 				row.find('.song-row-delete').on('click', deleteSong);

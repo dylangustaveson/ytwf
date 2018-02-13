@@ -195,7 +195,7 @@ function addSong(url) {
 
         if (songObj && songObj.valid) {
           redis.hset("songs", youtubeVideoId, JSON.stringify(songObj));
-          songQueue.push(songObj);
+          songQueue.unshift(songObj);
           songs[youtubeVideoId] = songObj;
           listSyncAddPatch(songObj);
           if (noSongs) {
@@ -235,7 +235,7 @@ function listSync(socket) {
 }
 
 function listSyncAddPatch(songObj) {
-  io.emit("listSync:add", songObj);
+  io.emit("listSync:add", songObj, true);
 }
 
 function listSyncDeletePatch(songObj) {
