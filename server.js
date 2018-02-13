@@ -25,8 +25,8 @@ var songs = {},
   currentSongEndTime,
   syncInterval,
   nextSongTimeout,
-	listeners = 0,
-	songQueue = [];
+  listeners = 0,
+  songQueue = [];
 
 function setNextSong(cb) {
   currentSong = songQueue[0];
@@ -53,7 +53,7 @@ function nextSong() {
     }
 
     currentSongTime = currentSong.time;
-		currentSongEndTime = new Date(new Date() + currentSongTime * 1000);
+    currentSongEndTime = new Date(new Date() + currentSongTime * 1000);
 
     emitSync();
     emitSongEnded(currentSong);
@@ -189,16 +189,17 @@ function addSong(url) {
     request(
       `https://www.googleapis.com/youtube/v3/videos?videoEmbeddable=true&id=${youtubeVideoId}&part=snippet,contentDetails,status&key=${googleApiKey}`,
       function(error, response, body) {
-        if (!error && response.statusCode === 200) {
-          var songObj = getSongObj(body);
-          if (songObj && songObj.valid) {
-            redis.hset("songs", youtubeVideoId, JSON.stringify(songObj));
-            songQueue.push(songObj);
-            songs[youtubeVideoId] = songObj;
-            listSyncAddPatch(songObj);
-            if (noSongs) {
-              nextSong();
-            }
+        if (error) throw new Error(error);
+
+        var songObj = getSongObj(body);
+
+        if (songObj && songObj.valid) {
+          redis.hset("songs", youtubeVideoId, JSON.stringify(songObj));
+          songQueue.push(songObj);
+          songs[youtubeVideoId] = songObj;
+          listSyncAddPatch(songObj);
+          if (noSongs) {
+            nextSong();
           }
         }
       }
