@@ -1,7 +1,6 @@
 body {
 	background-image: url(/static/background.png);
-	background-repeat: 
-	height:100%;
+	height: 100%;
 }
 
 .content {
@@ -10,9 +9,9 @@ body {
 
 .content.background {
 	position: fixed;
-	width: 650px; 
-	height: 100%;  
-	opacity: .75; 
+	width: 650px;
+	height: 100%;
+	opacity: .75;
 	z-index: -1;
   	background: #333;
 }
@@ -20,6 +19,7 @@ body {
 ::-webkit-scrollbar-track
 {
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 	background-color: #F5F5F5;
 }
 
@@ -39,7 +39,7 @@ body {
 	height: 100%;
 }
 
-.center {	
+.center {
     float: none;
     margin-left: auto;
     margin-right: auto;
@@ -59,24 +59,24 @@ body {
 }
 
 .button-success {
-    background-color: rgb(28, 184, 65); /* this is a green */
+    background-color: rgb(28, 184, 65);
 }
 
 .button-error {
-    background-color: rgb(202, 60, 60); /* this is a maroon */
+    background-color: rgb(202, 60, 60);
 }
 
 .button-warning {
-    background-color: rgb(223, 117, 20); /* this is an orange */
+    background-color: rgb(223, 117, 20);
 }
 
 .button-secondary {
-    background-color: rgb(66, 184, 221); /* this is a light blue */
+    background-color: rgb(66, 184, 221);
 }
 
 .content.item {
 	width: 640px;
-	padding-left: 5px;	
+	padding-left: 5px;
 	color: #EEE;
 }
 
@@ -85,7 +85,7 @@ body {
 	padding-left: 5px;
 }
 
-.frond-count {   
+.frond-count {
 	float: right;
     margin-top: 15px;
     color: #999;
@@ -157,7 +157,7 @@ input {
 	color: #111;
 }
 
-.content.background:after {	
+.content.background:after {
 	content: '';
 	top: -150px;
 	left: -50px;

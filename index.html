@@ -1,205 +1,202 @@
 <!doctype html>
+
 <head>
-	<!-- font awsome -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
-	<!-- jquery -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-
-	<!-- pure css -->
 	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
-
-	<!-- pure css responsive grid-->
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
-
-  	<script src="/socket.io/socket.io.js"></script>
-
+	<link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/grids-responsive-min.css">
+	<script src="/socket.io/socket.io.js"></script>
 	<link rel="stylesheet" type="text/css" href="/static/site.css">
 </head>
 <html>
-  <body>
-  	<div class="content-container center">
-  		<div class="content background"></div>
-	  	<div class="content">
-	  		<div>&nbsp;</div>
-	  		<div class="content item pure-g">
-			  	<div class="pure-u-7-8" >
-			  		<span class="header">YTWF <small>youtube with fronds</small></span>
-				</div>			
-				<div class="pure-u-1-8">
-					<div class="frond-count">			
-						<span class="listener-count">Fronds:</span>						
-						<span id="listener-count" class="listener-count">1</span>
+	<body>
+		<div class="content-container center">
+			<div class="content background"></div>
+			<div class="content">
+				<div>&nbsp;</div>
+				<div class="content item pure-g">
+					<div class="pure-u-7-8">
+						<span class="header">YTWF
+							<small>youtube with fronds</small>
+						</span>
+					</div>
+					<div class="pure-u-1-8">
+						<div class="frond-count">
+							<span class="listener-count">Fronds:</span>
+							<span id="listener-count" class="listener-count">1</span>
+						</div>
+					</div>
+				</div>
+				<div id="player" class="content item">
+					<iframe id="player" type="text/html" width="640" height="390" controls="0" rel: "0" frameborder="0"></iframe>
+				</div>
+				<div class="content item pure-form">
+					<div class="pure-g">
+						<button id="btn-skip" class="pure-button button-warning pure-u-1-1 pure-u-md-1-8" onclick="skipSong()">Skip</button>
+						<div class="pure-u-1-1 pure-u-md-1-8"></div>
+						<button id="btn-shuffle" class="pure-button button-secondary pure-u-1-1 pure-u-md-1-8" onclick="shuffle()">Shuffle</button>
+						<input id="txt-id" type="text" id="inputId" class="pure-u-1-1 pure-u-md-1-2" placeholder="Song">
+						<button id="btn-add" class="pure-button pure-button-primary pure-u-1-1 pure-u-md-1-8" onclick="addSong()">Add</button>
+					</div>
+				</div>
+				<br/>
+				<div class="content item song-list-container">
+					<div id="songList" class="song-list">
 					</div>
 				</div>
 			</div>
-		 	<div id="player" class="content item">
-		 		<iframe id="player" type="text/html" width="640" height="390" controls="0" rel: "0"
-				  frameborder="0"></iframe>
-		 	</div>
-		 	<div class="content item pure-form">	 
-		 		<div class="pure-g">		 			   		
-		    		<button id="btn-skip" class="pure-button button-warning pure-u-1-1 pure-u-md-1-8" onclick="skipSong()">Skip</button>
-		    		<div class="pure-u-1-1 pure-u-md-1-8"></div>
-		    		<button id="btn-shuffle" class="pure-button button-secondary pure-u-1-1 pure-u-md-1-8" onclick="shuffle()">Shuffle</button>
-      				<input id="txt-id" type="text" id="inputId" class="pure-u-1-1 pure-u-md-1-2" placeholder="Song">
-		    		<button id="btn-add" class="pure-button pure-button-primary pure-u-1-1 pure-u-md-1-8" onclick="addSong()">Add</button>
-			    </div>			    
-		    </div>
-		    <br/>
-		    <div class="content item song-list-container">
-		    	<div id="songList" class="song-list">
-
-		    	</div>
-		    </div>
 		</div>
-	</div>
-	<script>
-	  	var player;
-	  	var socket = io();  	
+		<script>
+			var player;
+			var socket = io();
 
-  	  	socket.on('listSync', function(obj) {
-  	  		var songList = $('#songList');
-  	  		songList.empty();
-  	  		for(var i in obj) {
-  	  			if (obj.hasOwnProperty(i)) {
-  	  				addSongToSongList(obj[i]);
-  	  			}
-  	  		}
-  	  	});
+			function addYoutubeIframeApi() {
+				var tag = document.createElement('script');
 
-  	  	socket.on('listSync:add', function(obj) {
-			addSongToSongList(obj, true);
-  	  	});
+				tag.src = "https://www.youtube.com/iframe_api";
+				var firstScriptTag = document.getElementsByTagName('script')[0];
+				firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			}
 
-  	  	socket.on('listSync:delete', function(obj) {
-			deleteSongFromSongList(obj);
-  	  	});
+			function onYouTubeIframeAPIReady() {
+				player = new YT.Player('player', {
+					playerVars: {
+						controls: 2,
+						disablekb: 1,
+						fs: 0,
+						iv_load_policy: 3,
+						rel: 0
+					},
+					events: {
+						'onReady': onPlayerReady,
+						'onStateChange': onPlayerStateChange
+					}
+				});
+			}
 
-  	  	socket.on('listSync:songEnded', function(obj) {
-			putSongAtEnd(obj);
-  	  	});
+			function onPlayerReady(event) {
+				socket.on('sync:song', function (syncObj) {
+					$('#listener-count').html(syncObj.listeners);
 
+					if (syncObj.currentSong.id !== player.getVideoData().video_id) {
+						player.loadVideoById(syncObj.currentSong.id, syncObj.syncTime);
+					} else if (!(syncObj.syncTime - 3 < player.getCurrentTime() && player.getCurrentTime() < syncObj.syncTime + 3)) {
+						player.seekTo(syncObj.syncTime);
+					}
+				});
+			}
 
-  	  	socket.on('listSync:songQueued', function(obj) {
-			moveSongToTop(obj);
-  	  	});
+			function onPlayerStateChange(event) {
+				if (event.data == YT.PlayerState.PAUSED) {
+					player.playVideo();
+				}
+			}
 
-  	  	socket.on('listSync:songDequeued', function(obj) {
-			putSongAtEnd(obj);
-  	  	});
+			function addSong() {
+				socket.emit('add', $('#txt-id').val())
+				$('#txt-id').val('');
+			}
 
+			function skipSong() {
+				socket.emit('skip');
+			}
 
-		var tag = document.createElement('script');
+			function deleteSong(event) {
+				socket.emit('delete', event.currentTarget.attributes["songId"].value);
+			}
 
-		tag.src = "https://www.youtube.com/iframe_api";
-	    var firstScriptTag = document.getElementsByTagName('script')[0];
-	 	firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+			function queueSong(event) {
+				socket.emit('queue', event.currentTarget.attributes["songId"].value);
+			}
 
-		function onYouTubeIframeAPIReady() {
-	        player = new YT.Player('player', {
-	          playerVars: {
-	          	controls: 2,
-	          	disablekb: 1,
-	          	fs: 0,
-	          	iv_load_policy: 3,
-	          	rel: 0
-	          },
-	          events: {
-	            'onReady': onPlayerReady,
-	            'onStateChange': onPlayerStateChange
-	          		}
-			});
-	  	}
+			function shuffle() {
+				socket.emit('shuffle');
+			}
 
-		function onPlayerReady(event) {
-		  	socket.on('sync:song', function(syncObj) {		  		
-				$('#listener-count').html(syncObj.listeners);
-		  		if (syncObj.currentSong.id !== player.getVideoData().video_id) {
-		  			player.loadVideoById(syncObj.currentSong.id, syncObj.syncTime);
-		  		} else if (!(syncObj.syncTime - 3 < player.getCurrentTime() && player.getCurrentTime() < syncObj.syncTime + 3)) {
-		  			player.seekTo(syncObj.syncTime);
-		  		}
+			$("#btn-shuffle").on("click", shuffle);
 
-	  	  	});
-	    }
+			function dequeueSong(event) {
+				socket.emit('dequeue', event.currentTarget.attributes["songId"].value);
+			}
 
-	  	function onPlayerStateChange(event) {
-	        if (event.data == YT.PlayerState.PAUSED) {
-	          player.playVideo();
-	        }
-	    }
+			function addSongToSongList(obj, prepend) {
+				if (prepend) {
+					$('#songList').prepend(getTableRow(obj));
+				} else {
+					$('#songList').append(getTableRow(obj));
+				}
+			}
 
-	    function addSong() {
-	    	socket.emit('add', $('#txt-id').val())
-	    	$('#txt-id').val('');
-	    }
+			function deleteSongFromSongList(obj) {
+				$("#songList").find(`div[songId='${obj.id}']`).remove();
+			}
 
-	    function skipSong() {
-	   		socket.emit('skip');
-	    }
+			function moveSongToTop(id) {
+				var row = $("div[songId=" + id + "]");
 
-	    function deleteSong(event) {
-    		socket.emit('delete', event.currentTarget.attributes["songId"].value);
-	    }
+				row.detach();
 
-	    function queueSong(event) {
-    		socket.emit('queue', event.currentTarget.attributes["songId"].value);
-	    }
-
-	    function shuffle() {
-	   		socket.emit('shuffle');
-	    }
-
-	  	$("#btn-shuffle").on("click", shuffle);
-
-	    function dequeueSong(event) {
-    		socket.emit('dequeue', event.currentTarget.attributes["songId"].value);
-	    }
-
-	    function addSongToSongList(obj, prepend) {
-	    	if (prepend) {
-				$('#songList').prepend(getTableRow(obj));
-	    	} else {
-	    		$('#songList').append(getTableRow(obj));
-	    	}
-	    }
-
-	    function deleteSongFromSongList(obj) {
-    		$("#songList").find("div[songId='"+obj.id+"']").remove();
-	    }
-
-	    function moveSongToTop(id) {
-	    	var row = $("div[songId="+id+"]");
-	    	row.detach();
-	    	$("#songList").prepend(row);
-	    }
+				$("#songList").prepend(row);
+			}
 
 
-	    function putSongAtEnd(id) {
-	    	var row = $("div[songId="+id+"]");
-	    	row.detach();
-	    	$("#songList").append(row);	
-	    }
+			function putSongAtEnd(id) {
+				var row = $("div[songId=" + id + "]");
 
-	    function getTableRow(songObj) {
-	    	var songMin = Math.floor(songObj.time / 60);
-	    	var songSec = songObj.time % 60;
-	    	var rowHtml = '';
-	    	rowHtml += '<div songId="'+songObj.id+'" class="song-row pure-g">';
-		    	rowHtml += '<span class="pure-u-17-24 song-row-content">'+songObj.title+'</span>';
-		    	rowHtml += '<span class="pure-u-3-24 song-row-content">'+songMin+'m' + songSec + 's</span>';
-		    	rowHtml += '<span class="pure-u-1-24 song-row-queue" songId="'+songObj.id+'"><i class="fa fa-chevron-up"></i></span>';
-		    	rowHtml += '<span class="pure-u-1-24 song-row-dequeue" songId="'+songObj.id+'"><i class="fa fa-chevron-down"></i></span>';
-		    	rowHtml += '<span class="pure-u-1-24"></span>';
-		    	rowHtml += '<span class="pure-u-1-24 song-row-delete" songId="'+songObj.id+'"><i class="fa fa-times"></i></span>';
-	    	rowHtml += '</div>';
-	    	var row = $(rowHtml);
-	    	row.find('.song-row-delete').on('click', deleteSong);
-	    	row.find('.song-row-queue').on('click', queueSong);
-	    	row.find('.song-row-dequeue').on('click', dequeueSong);
-	    	return row;
-	    }
-	</script>
-</body>
+				row.detach();
+
+				$("#songList").append(row);
+			}
+
+			function getTableRow(songObj) {
+				var songMin = Math.floor(songObj.time / 60);
+				var songSec = songObj.time % 60;
+
+				var row = $(''+
+				`<div songId="${songObj.id}" class="song-row pure-g">` +
+					`<span class="pure-u-17-24 song-row-content">${songObj.title}'</span>` +
+					`<span class="pure-u-3-24 song-row-content">${songMin}'m'${songSec}'s</span>` +
+					`<span class="pure-u-1-24 song-row-queue" songId="${songObj.id}"><i class="fa fa-chevron-up"></i></span>` +
+					`<span class="pure-u-1-24 song-row-dequeue" songId="${songObj.id}"><i class="fa fa-chevron-down"></i></span>` +
+					`<span class="pure-u-1-24"></span>` +
+					`<span class="pure-u-1-24 song-row-delete" songId="${songObj.id}"><i class="fa fa-times"></i></span>` +
+				`</div>`);
+
+				row.find('.song-row-delete').on('click', deleteSong);
+				row.find('.song-row-queue').on('click', queueSong);
+				row.find('.song-row-dequeue').on('click', dequeueSong);
+
+				return row;
+			}
+
+
+			function listenToWsEvents() {
+				socket.on('listSync', function (event) {
+					var songList = $('#songList');
+
+					songList.empty();
+
+					for (var i in event) {
+						if (event.hasOwnProperty(i)) {
+							addSongToSongList(event[i]);
+						}
+					}
+				});
+
+				socket.on('listSync:add', addSongToSongList);
+
+				socket.on('listSync:delete', deleteSongFromSongList);
+
+				socket.on('listSync:songEnded', putSongAtEnd);
+
+				socket.on('listSync:songQueued', moveSongToTop);
+
+				socket.on('listSync:songDequeued', putSongAtEnd);
+			}
+
+			addYoutubeIframeApi();
+
+			listenToWsEvents();
+		</script>
+	</body>
 </html>
